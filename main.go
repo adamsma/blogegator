@@ -11,22 +11,19 @@ func main() {
 
 	cfg, err := config.Read()
 	if err != nil {
-		log.Fatal("Unable to read configuration file: ", err)
+		log.Fatal("unable to read configuration file: ", err)
 	}
 
-	// fmt.Println("Initial:")
-	// fmt.Printf("%+v\n", cfg)
-	// fmt.Println("----------")
-
-	config.SetUser("Marcus", &cfg)
+	err = config.SetUser("Marcus", &cfg)
+	if err != nil {
+		log.Fatal("unable to set username: ", err)
+	}
 
 	cfg, err = config.Read()
 	if err != nil {
-		log.Fatal("Unable to read updated configuration file: ", err)
+		log.Fatal("unable to read updated configuration file: ", err)
 	}
 
-	// fmt.Println("Updated:")
 	fmt.Printf("%+v\n", cfg)
-	// fmt.Println("----------")
 
 }

@@ -2,27 +2,28 @@ package config
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
 )
 
 func Read() (Config, error) {
 
 	configPath, err := getConfigFilePath()
-
 	if err != nil {
 		return Config{}, err
 	}
 
 	cfgContent, err := os.ReadFile(configPath)
 	if err != nil {
-		log.Fatal("Unable to read config file: ", err)
+		err = fmt.Errorf("unable to read config file: %v", err)
+		return Config{}, err
 	}
 
 	var cfg Config
 	err = json.Unmarshal(cfgContent, &cfg)
 	if err != nil {
-		log.Fatal("Error parsing config file: ", err)
+		err = fmt.Errorf("Error parsing config file: %v", err)
+		return Config{}, err
 	}
 
 	return cfg, nil
