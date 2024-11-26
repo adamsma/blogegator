@@ -1,0 +1,25 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func handlerLogin(s *state, cmd command) error {
+
+	if len(cmd.args) == 0 {
+		return errors.New("command login expects 'username' argument")
+	}
+
+	name := cmd.args[0]
+
+	err := s.config.SetUser(name)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Current user set to: %s\n", name)
+
+	return nil
+
+}
