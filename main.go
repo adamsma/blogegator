@@ -1,14 +1,19 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/adamsma/blogegator/internal/config"
+	"github.com/adamsma/blogegator/internal/database"
+
+	_ "github.com/lib/pq"
 )
 
 type state struct {
+	db     *database.Queries
 	config *config.Config
 }
 
@@ -27,8 +32,17 @@ func main() {
 		registered: map[string]func(*state, command) error{},
 	}
 
+	// establish database connection
+	db, err := sql.Open("postgres", appState.config.DBURL)
+	if err != nil {
+		log.Fatalf("unable to establish connection to database: %v", err)
+	}
+
+	appState.db = database.New(db)
+
 	// register commands
 	appCommands.register("login", handlerLogin)
+	appCommands.register("register", handlerRegister)
 
 	cliArgs := os.Args
 

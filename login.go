@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 )
 
 func handlerLogin(s *state, cmd command) error {
@@ -13,7 +16,17 @@ func handlerLogin(s *state, cmd command) error {
 
 	name := cmd.args[0]
 
-	err := s.config.SetUser(name)
+	user, err := s.db.GetUser(context.Background(), name)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			fmt.Println("login failed: unknown user")
+			os.Exit(1)
+		}
+
+		return fmt.Errorf("login failed: %w", err)
+	}
+
+	err = s.config.SetUser(user.Name)
 	if err != nil {
 		return fmt.Errorf("couldn't login current user: %w", err)
 	}
