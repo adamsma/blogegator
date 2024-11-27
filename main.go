@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -13,14 +14,14 @@ type state struct {
 
 func main() {
 
-	var appState state
-
 	cfg, err := config.Read()
 	if err != nil {
-		log.Fatal("unable to read configuration file: ", err)
+		log.Fatalf("unable to read configuration file: %v", err)
 	}
 
-	appState.config = &cfg
+	appState := &state{
+		config: &cfg,
+	}
 
 	appCommands := commands{
 		registered: map[string]func(*state, command) error{},
@@ -32,7 +33,8 @@ func main() {
 	cliArgs := os.Args
 
 	if len(cliArgs) < 2 {
-		log.Fatal("missing command name")
+		fmt.Println("Usage: blogegator <command> [args...]")
+		return
 	}
 
 	cmd := command{
@@ -40,7 +42,7 @@ func main() {
 		args: cliArgs[2:],
 	}
 
-	err = appCommands.run(&appState, cmd)
+	err = appCommands.run(appState, cmd)
 	if err != nil {
 		log.Fatal(err)
 	}

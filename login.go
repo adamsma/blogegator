@@ -15,7 +15,7 @@ func handlerLogin(s *state, cmd command) error {
 
 	err := s.config.SetUser(name)
 	if err != nil {
-		return err
+		return fmt.Errorf("couldn't login current user: %w", err)
 	}
 
 	fmt.Printf("Current user set to: %s\n", name)
