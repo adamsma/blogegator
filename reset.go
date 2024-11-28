@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 )
 
 func handlerReset(s *state, cmd command) error {
@@ -14,7 +14,7 @@ func handlerReset(s *state, cmd command) error {
 
 	err := s.db.ClearUsers(context.Background())
 	if err != nil {
-		log.Fatal("unable to reset user table")
+		return errors.New("unable to reset user table")
 	}
 
 	fmt.Println("User table reset successfully")

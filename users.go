@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func handlerUsers(s *state, cmd command) error {
+func handlerListUsers(s *state, cmd command) error {
 
 	if len(cmd.args) > 0 {
 		fmt.Println("arguments ignored: command accepts no arguments")
