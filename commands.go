@@ -18,7 +18,7 @@ func (c *commands) register(name string, f func(*state, command) error) {
 }
 
 func (c *commands) run(s *state, cmd command) error {
-
+	
 	handler, ok := c.registered[cmd.name]
 	if !ok {
 		return fmt.Errorf("unknown or unregistered command: %s", cmd.name)

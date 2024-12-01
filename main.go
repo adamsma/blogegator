@@ -29,7 +29,7 @@ func main() {
 	}
 
 	appCommands := commands{
-		registered: map[string]func(*state, command) error{},
+		registered: make(map[string]func(*state, command) error),
 	}
 
 	// establish database connection
@@ -39,12 +39,13 @@ func main() {
 	}
 
 	appState.db = database.New(db)
-
+	
 	// register commands
 	appCommands.register("login", handlerLogin)
 	appCommands.register("register", handlerRegister)
 	appCommands.register("reset", handlerReset)
 	appCommands.register("users", handlerListUsers)
+	appCommands.register("addfeed", handlerAddFeed)
 	appCommands.register("agg", handlerAgg)
 
 	cliArgs := os.Args
