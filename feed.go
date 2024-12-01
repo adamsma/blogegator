@@ -46,6 +46,32 @@ func handlerAddFeed(s *state, cmd command) error {
 	return nil
 }
 
+func handlerShowFeeds(s *state, cmd command) error {
+
+	if len(cmd.args) > 0 {
+		fmt.Println("arguments ignored: command accepts no arguments")
+	}
+
+	feeds, err := s.db.GetFeedSummaries(context.Background())
+	if err != nil {
+		return fmt.Errorf("unable to retrieve feed summary: %v", err)
+	}
+
+	if len(feeds) == 0 {
+		fmt.Println("No feeds found.")
+		return nil
+	}
+
+	for _, feed := range feeds {
+		fmt.Println("=====================================")
+		printFeedSummary(feed)
+	}
+
+	fmt.Println("=====================================")
+
+	return nil
+}
+
 func printFeed(f database.Feed, u database.User) (string, error) {
 
 	if f.UserID != u.ID {
@@ -60,4 +86,12 @@ func printFeed(f database.Feed, u database.User) (string, error) {
 	str += fmt.Sprintf("* User:     %s\n", u.Name)
 
 	return str, nil
+}
+
+func printFeedSummary(fs database.GetFeedSummariesRow) {
+	fmt.Printf("* Name: %s\n", fs.FeedName)
+	fmt.Printf("* URL:  %s\n", fs.Url)
+	fmt.Printf("* User: %s\n", fs.UserName)
+
+	return
 }

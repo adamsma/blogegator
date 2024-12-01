@@ -47,3 +47,42 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 	)
 	return i, err
 }
+
+const getFeedSummaries = `-- name: GetFeedSummaries :many
+SELECT 
+  t1.name as feed_name,
+  t1.url,
+  t2.name as user_name
+FROM feeds t1
+INNER JOIN users t2
+on t1.user_id = t2.id
+`
+
+type GetFeedSummariesRow struct {
+	FeedName string
+	Url      string
+	UserName string
+}
+
+func (q *Queries) GetFeedSummaries(ctx context.Context) ([]GetFeedSummariesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedSummaries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFeedSummariesRow
+	for rows.Next() {
+		var i GetFeedSummariesRow
+		if err := rows.Scan(&i.FeedName, &i.Url, &i.UserName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
