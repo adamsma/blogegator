@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -19,8 +18,7 @@ func handlerLogin(s *state, cmd command) error {
 	user, err := s.db.GetUser(context.Background(), name)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
-			fmt.Println("login failed: unknown user")
-			os.Exit(1)
+			return fmt.Errorf("login failed: unknown user")
 		}
 
 		return fmt.Errorf("login failed: %w", err)
