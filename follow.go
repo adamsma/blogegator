@@ -70,3 +70,30 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 
 	return nil
 }
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+
+	if len(cmd.args) < 1 {
+		return errors.New("usage: unfollow <url>")
+	}
+
+	url := cmd.args[0]
+
+	feed, err := s.db.GetFeedByURL(context.Background(), url)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			return fmt.Errorf("feed not found")
+		}
+
+		return fmt.Errorf("unable to retrieve feed: %w", err)
+	}
+
+	err = s.db.DeleteFeedFollowsRow(context.Background(), database.DeleteFeedFollowsRowParams{UserID: user.ID, FeedID: feed.ID})
+	if err != nil {
+		return fmt.Errorf("unable to unfollow feed: %v", err)
+	}
+
+	fmt.Printf("%s unfollowed successfully!\n", feed.Name)
+
+	return nil
+}

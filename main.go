@@ -49,6 +49,7 @@ func main() {
 	appCommands.register("agg", handlerAgg)
 	appCommands.register("feeds", handlerShowFeeds)
 	appCommands.register("follow", middlewareLoggedIn(handlerFollow))
+	appCommands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 	appCommands.register("following", middlewareLoggedIn(handlerFollowing))
 
 	cliArgs := os.Args
