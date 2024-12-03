@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerRegister(s *state, cmd command) error {
+func handlerRegisterUser(s *state, cmd command) error {
 
 	if len(cmd.args) == 0 {
 		return errors.New("usage: register <username>")

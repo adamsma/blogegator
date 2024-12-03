@@ -10,24 +10,19 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 
 	if len(cmd.args) < 2 {
 		return errors.New("usage: addFeed <name> <url>")
 	}
 
-	user, err := s.db.GetUser(context.Background(), s.config.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("unable to retrieve user information: %v", err)
-	}
-
 	feedParams := database.CreateFeedParams{
-		ID: uuid.New(),      
+		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		Name:   cmd.args[0],
-		Url:    cmd.args[1],
-		UserID: user.ID,
+		Name:      cmd.args[0],
+		Url:       cmd.args[1],
+		UserID:    user.ID,
 	}
 
 	feed, err := s.db.CreateFeed(context.Background(), feedParams)
@@ -43,8 +38,7 @@ func handlerAddFeed(s *state, cmd command) error {
 	fmt.Printf("%s\n", fStr)
 	fmt.Println("=====================================")
 
-
-	return handlerFollow(s, command{"follow", cmd.args[1:]})
+	return handlerFollow(s, command{"follow", cmd.args[1:]}, user)
 }
 
 func handlerShowFeeds(s *state, cmd command) error {
@@ -93,6 +87,4 @@ func printFeedSummary(fs database.GetFeedSummariesRow) {
 	fmt.Printf("* Name: %s\n", fs.FeedName)
 	fmt.Printf("* URL:  %s\n", fs.Url)
 	fmt.Printf("* User: %s\n", fs.UserName)
-
-	return
 }

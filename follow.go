@@ -4,14 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/adamsma/blogegator/internal/database"
 	"github.com/google/uuid"
 )
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 
 	if len(cmd.args) < 1 {
 		return errors.New("usage: follow <url>")
@@ -28,37 +28,32 @@ func handlerFollow(s *state, cmd command) error {
 		return fmt.Errorf("unable to retrieve feed: %v", err)
 	}
 
-	user, err := s.db.GetUser(context.Background(), s.config.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("unable to retrieve user information: %v", err)
-	}
-
-	args := database.CreateFeedFollowParams {
-		ID: uuid.New(),      
+	args := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		UserID: user.ID,
-		FeedID: feed.ID,
+		UserID:    user.ID,
+		FeedID:    feed.ID,
 	}
 
 	feedFollow, err := s.db.CreateFeedFollow(context.Background(), args)
 	if err != nil {
 		return fmt.Errorf("unable to follow feed: %v", err)
 	}
-	
+
 	fmt.Println("Now Following:")
 	fmt.Printf("* User: %s\n", feedFollow.UserName)
 	fmt.Printf("* Feed: %s\n", feedFollow.FeedName)
-	
+
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
 
 	follows, err := s.db.GetFeedFollowsForUser(
-		context.Background(), s.config.CurrentUserName,
+		context.Background(), user.ID,
 	)
-	
+
 	if err != nil {
 		return fmt.Errorf("unable to retrieve feeds being followed: %v", err)
 	}
