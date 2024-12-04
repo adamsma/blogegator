@@ -42,8 +42,3 @@ WHERE t1.user_id = $1;
 -- name: DeleteFeedFollowsRow :exec
 DELETE FROM feed_follows
 WHERE user_id = $1 AND feed_id = $2;
-
--- name: MarkFeedFetched :exec
-UPDATE feeds
-SET last_fetched_at = $1, updated_at = $1
-WHERE id = $2;
