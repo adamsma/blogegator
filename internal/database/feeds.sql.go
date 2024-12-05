@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -193,16 +194,18 @@ const getFeedSummaries = `-- name: GetFeedSummaries :many
 SELECT 
   t1.name as feed_name,
   t1.url,
-  t2.name as user_name
+  t2.name as user_name,
+  t1.last_fetched_at
 FROM feeds t1
 INNER JOIN users t2
 on t1.user_id = t2.id
 `
 
 type GetFeedSummariesRow struct {
-	FeedName string
-	Url      string
-	UserName string
+	FeedName      string
+	Url           string
+	UserName      string
+	LastFetchedAt sql.NullTime
 }
 
 func (q *Queries) GetFeedSummaries(ctx context.Context) ([]GetFeedSummariesRow, error) {
@@ -214,7 +217,12 @@ func (q *Queries) GetFeedSummaries(ctx context.Context) ([]GetFeedSummariesRow, 
 	var items []GetFeedSummariesRow
 	for rows.Next() {
 		var i GetFeedSummariesRow
-		if err := rows.Scan(&i.FeedName, &i.Url, &i.UserName); err != nil {
+		if err := rows.Scan(
+			&i.FeedName,
+			&i.Url,
+			&i.UserName,
+			&i.LastFetchedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

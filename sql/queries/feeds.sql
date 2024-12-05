@@ -7,7 +7,8 @@ RETURNING *;
 SELECT 
   t1.name as feed_name,
   t1.url,
-  t2.name as user_name
+  t2.name as user_name,
+  t1.last_fetched_at
 FROM feeds t1
 INNER JOIN users t2
 on t1.user_id = t2.id;

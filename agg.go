@@ -6,10 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/adamsma/blogegator/internal/database"
 	"github.com/adamsma/blogegator/internal/rss"
+	"github.com/google/uuid"
 )
 
 func handlerAgg(s *state, cmd command) error {
@@ -27,16 +29,19 @@ func handlerAgg(s *state, cmd command) error {
 
 	ticker := time.NewTicker(timeBetweenRequests)
 	for ; ; <-ticker.C {
-		scrapeFeeds(s)
+		err = scrapeFeeds(s)
+		if err != nil {
+			return err
+		}
 	}
 
 }
 
-func scrapeFeeds(s *state) {
+func scrapeFeeds(s *state) error {
 
 	nextFeed, err := s.db.GetNextFeedToFetch(context.Background())
 	if err != nil {
-		log.Fatal("unable to fetch next feed to agg")
+		return errors.New("unable to fetch next feed to agg")
 	}
 
 	err = s.db.MarkFeedFetched(
@@ -50,16 +55,43 @@ func scrapeFeeds(s *state) {
 		log.Printf("unable to mark feed %s as fetched: %v", nextFeed.Name, err)
 	}
 
-	feed, err := rss.FetchFeed(context.Background(), nextFeed.Url)
+	rssFeed, err := rss.FetchFeed(context.Background(), nextFeed.Url)
 	if err != nil {
 		msg := fmt.Errorf("unable to fetch feed %s: %w", nextFeed.Name, err)
 		fmt.Println(msg)
-		return
+		return nil
 	}
 
-	fmt.Printf("Items aggregated for '%s':\n", nextFeed.Name)
-	for _, item := range feed.Channel.Item {
-		fmt.Printf("* %s\n", item.Title)
+	fmt.Printf("Aggregating post for '%s':\n", nextFeed.Name)
+	newPosts := 0
+	for _, item := range rssFeed.Channel.Item {
+
+		params := database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: item.Description,
+			PublishedAt: item.PubDate,
+			FeedID:      nextFeed.ID,
+		}
+
+		_, err = s.db.CreatePost(context.Background(), params)
+		if err != nil {
+
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"posts_url_key\"") {
+				continue
+			}
+
+			return fmt.Errorf("unable to save post: %w", err)
+		}
+
+		newPosts++
+
 	}
 
+	fmt.Printf("New Posts Captured: %d\n", newPosts)
+
+	return nil
 }

@@ -84,7 +84,8 @@ func printFeed(f database.Feed, u database.User) (string, error) {
 }
 
 func printFeedSummary(fs database.GetFeedSummariesRow) {
-	fmt.Printf("* Name: %s\n", fs.FeedName)
-	fmt.Printf("* URL:  %s\n", fs.Url)
-	fmt.Printf("* User: %s\n", fs.UserName)
+	fmt.Printf("* Name:            %s\n", fs.FeedName)
+	fmt.Printf("* URL:             %s\n", fs.Url)
+	fmt.Printf("* User:            %s\n", fs.UserName)
+	fmt.Printf("* Last Fetched At: %v\n", fs.LastFetchedAt.Time)
 }
