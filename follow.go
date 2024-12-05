@@ -22,7 +22,7 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 	feed, err := s.db.GetFeedByURL(context.Background(), url)
 	if err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
-			return fmt.Errorf("feed not found. Use 'register' command to add")
+			return fmt.Errorf("feed not found. Use 'addfeed' command to add")
 		}
 
 		return fmt.Errorf("unable to retrieve feed: %v", err)
